@@ -12,6 +12,8 @@ func TestHttpGet(t *testing.T) {
 
 	header := map[string]string{"Authorization": "Bearer 12345"}
 
+	queries := map[string]string{"before": "2024-01-01T00:00:00Z"}
+
 	expectedResponseBody := []byte(`{"data":"success"}`)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,6 +23,14 @@ func TestHttpGet(t *testing.T) {
 
 		if r.Method != "GET" {
 			t.Errorf("Expected to GET method, got: %s", r.URL.Path)
+		}
+
+		gotQueries := r.URL.Query()
+		for k, want := range queries {
+			got := gotQueries.Get(k)
+			if got != want {
+				t.Errorf("Expected query value %s for %s, got: %s", want, k, got)
+			}
 		}
 
 		if r.Header.Get("Authorization") != "Bearer 12345" {
@@ -38,7 +48,7 @@ func TestHttpGet(t *testing.T) {
 
 	defer server.Close()
 
-	actual, _ := Get(url, header)
+	actual, _ := Get(url, header, queries)
 
 	if string(expectedResponseBody) != string(actual) {
 		t.Errorf("Expected %s, got %s", expectedResponseBody, actual)

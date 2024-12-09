@@ -9,9 +9,21 @@ import (
 	"strings"
 )
 
-// TODO: Add query parameters map
-func Get(url string, header map[string]string) ([]byte, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func Get(baseUrl string, header map[string]string, queries map[string]string) ([]byte, error) {
+	u, err := url.Parse(baseUrl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	query := u.Query()
+
+	for k, v := range queries {
+		query.Set(k, v)
+	}
+
+	u.RawQuery = query.Encode()
+
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
