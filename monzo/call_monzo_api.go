@@ -120,7 +120,8 @@ func EncodeTransactionsCsv(transactions []Transaction) (string, error) {
 		return "", fmt.Errorf("Failed to get current working directory: %w", err)
 	}
 
-	path = path + "/result_1.csv"
+	timestamp := time.Now().Format("20060102_150405")
+	path = fmt.Sprintf("%s/result_%s.csv", path, timestamp)
 
 	f, err := os.Create(path)
 	if err != nil {

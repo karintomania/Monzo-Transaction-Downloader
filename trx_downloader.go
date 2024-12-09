@@ -10,7 +10,7 @@ func main() {
 	since := time.Now().AddDate(0, -1, 0)
 
 	log.Printf("Refresh token")
-	// monzo.RefreshToken()
+	monzo.RefreshToken()
 
 	log.Printf("Download Transactions")
 	transactions := monzo.DownloadTransactions(since)

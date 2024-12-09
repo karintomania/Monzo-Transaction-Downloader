@@ -14,6 +14,7 @@ import (
 )
 
 func TestMonzoRefreshToken(t *testing.T) {
+	defer os.Remove(cache.Fake())
 
 	cache.Write(cache.MonzoAccessTokenKey, "accessToken_before")
 	cache.Write(cache.MonzoRefreshTokenKey, "refreshToken_before")
@@ -88,6 +89,7 @@ func mockServer(t *testing.T, accessToken string, tr TransactionResponse, q map[
 }
 
 func TestMonzoDownloadTransaction(t *testing.T) {
+	defer os.Remove(cache.Fake())
 
 	accessToken := "accessToken_123"
 	cache.Write(cache.MonzoAccessTokenKey, accessToken)
@@ -194,7 +196,7 @@ func TestEncodeTransactionsCsv(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to encode transactions to CSV: %v", err)
 	}
-    defer os.Remove(path)
+	defer os.Remove(path)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -235,7 +237,4 @@ func TestEncodeTransactionsCsv(t *testing.T) {
 			t.Errorf("Expected %v, but got %v", want, got)
 		}
 	}
-
-
-
 }

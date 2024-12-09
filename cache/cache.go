@@ -28,6 +28,17 @@ func Read(key string) string {
 	return c[key]
 }
 
+// create a tmp cache file for testing and use it
+func Fake() string {
+	f, err := os.CreateTemp("", "cache.json")
+	if err != nil {
+		log.Fatalf("Failed to create fake cache file: %v", err)
+	}
+
+	config.Set("cache_file_path", f.Name())
+	return f.Name()
+}
+
 func writeOnFile(data map[string]string) {
 	b, err := json.Marshal(data)
 	if err != nil {
@@ -50,7 +61,7 @@ func writeOnFile(data map[string]string) {
 func readFromFile() map[string]string {
 	path := config.Get("cache_file_path")
 
-	err := ensureFileExists(path)
+	err := createFileIfNotExists(path)
 	if err != nil {
 		log.Fatalf("File doesn't exists on %s: %v", path, err)
 	}
@@ -59,20 +70,20 @@ func readFromFile() map[string]string {
 	if err != nil {
 		log.Fatalf("Can't open file %s: %v", path, err)
 	}
-
 	decoder := json.NewDecoder(f)
 
 	cache := make(map[string]string)
 
 	err = decoder.Decode(&cache)
 	if err != nil {
-		log.Fatalf("Can't decode cache file %s: %v", path, err)
+		// if it faled to decode, return empty cache
+		return cache
 	}
 
 	return cache
 }
 
-func ensureFileExists(path string) error {
+func createFileIfNotExists(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		file, err := os.Create(path)
 		if err != nil {
