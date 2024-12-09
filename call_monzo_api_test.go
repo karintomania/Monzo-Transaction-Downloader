@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"karinto/trx-downloader/cache"
 	"karinto/trx-downloader/config"
 	"net/http"
@@ -18,11 +17,14 @@ func TestMonzoRefreshToken(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			decoder := json.NewDecoder(r.Body)
-			var payload map[string]string
-			err := decoder.Decode(&payload)
-			if payload["refresh_token"] != "refreshToken_before" {
-				t.Errorf("Failed to read request body: %v", err)
+            
+            err := r.ParseForm()
+			if err != nil {
+				t.Errorf("Failed to parse form data: %v", err)
+			}
+
+			if r.FormValue("refresh_token") != "refreshToken_before" {
+				t.Errorf("Expected refreshToken_before, but got %s", r.FormValue("refresh_token"))
 			}
 
 			w.WriteHeader(http.StatusOK)
@@ -39,7 +41,8 @@ func TestMonzoRefreshToken(t *testing.T) {
 
 	RefreshToken()
 
-	if cache.ReadCache(cache.MonzoAccessTokenKey) != "accessToken_after" && cache.ReadCache(cache.MonzoRefreshTokenKey) != "refreshToken_after" {
+	if cache.ReadCache(cache.MonzoAccessTokenKey) != "accessToken_after" &&
+    cache.ReadCache(cache.MonzoRefreshTokenKey) != "refreshToken_after" {
 		t.Error("Failed to refresh token")
 	}
 

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"karinto/trx-downloader/cache"
+	"karinto/trx-downloader/config"
 )
 
 func main() {
-	fmt.Println("Hello, World!")
-	cache.WriteCache("test", "testvalue")
+    config.InitConfig()
+
+    RefreshToken()
+
 }
