@@ -194,6 +194,7 @@ func TestEncodeTransactionsCsv(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to encode transactions to CSV: %v", err)
 	}
+    defer os.Remove(path)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -234,5 +235,7 @@ func TestEncodeTransactionsCsv(t *testing.T) {
 			t.Errorf("Expected %v, but got %v", want, got)
 		}
 	}
+
+
 
 }
