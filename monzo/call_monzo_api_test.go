@@ -69,7 +69,7 @@ func mockServer(t *testing.T, accessToken string, tr TransactionResponse, q map[
 			}
 
 			// assert Auth
-			if got, want := r.Header.Get("Authorization"), "Bearer " + accessToken; got != want {
+			if got, want := r.Header.Get("Authorization"), "Bearer "+accessToken; got != want {
 				t.Errorf("Expected Authorization %s, but got %s", want, got)
 			}
 
@@ -122,7 +122,7 @@ func TestMonzoDownloadTransaction(t *testing.T) {
 		},
 	}
 
-    since := time.Now().AddDate(0, 1, 0)
+	since := time.Now().AddDate(0, -1, 0)
 
 	wantQueries := map[string]string{
 		"expand[]":   "merchant",

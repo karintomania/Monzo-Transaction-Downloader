@@ -120,7 +120,7 @@ func EncodeTransactionsCsv(transactions []Transaction) (string, error) {
 		return "", fmt.Errorf("Failed to get current working directory: %w", err)
 	}
 
-	path = path + "result_1.csv"
+	path = path + "/result_1.csv"
 
 	f, err := os.Create(path)
 	if err != nil {
