@@ -14,56 +14,56 @@ const MonzoClientSecretKey = "MonzoClientSecret"
 
 func writeConfig(key, value string) bool {
 
-    c := readFromFile()
-    c[key] = value
+	c := readFromFile()
+	c[key] = value
 
-    writeOnFile(c)
+	writeOnFile(c)
 
-    return true
+	return true
 }
 
 func readConfig(key string) string {
-    c := readFromFile()
+	c := readFromFile()
 
-    return c[key]
+	return c[key]
 }
 
 func writeOnFile(data map[string]string) {
 
-    b, err := json.Marshal(data)
-    log.Println(string(b))
+	b, err := json.Marshal(data)
+	log.Println(string(b))
 
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    path := filepath.Dir(os.Args[0]) + "/config.json"
-    f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer f.Close()
+	path := filepath.Dir(os.Args[0]) + "/config.json"
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
 
-    _, err = f.Write(b)
+	_, err = f.Write(b)
 
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func readFromFile() map[string]string {
-    path := filepath.Dir(os.Args[0]) + "/config.json"
+	path := filepath.Dir(os.Args[0]) + "/config.json"
 
-    body, err := os.ReadFile(path)
+	body, err := os.ReadFile(path)
 
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    var config map[string]string
-    json.Unmarshal(body, &config)
+	var config map[string]string
+	json.Unmarshal(body, &config)
 
-    return config
+	return config
 }
 
 func ensureFileExists(path string) error {

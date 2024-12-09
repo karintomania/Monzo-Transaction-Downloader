@@ -6,31 +6,31 @@ import (
 )
 
 func TestConfigReadWrite(t *testing.T) {
-    key := MonzoAccessTokenKey
-    value := "xxxxx"
+	key := MonzoAccessTokenKey
+	value := "xxxxx"
 
-    isWritten := writeConfig(key, value)
+	isWritten := writeConfig(key, value)
 
-    if !isWritten {
-        t.Error("Failed to write cache")
-    }
+	if !isWritten {
+		t.Error("Failed to write cache")
+	}
 
-    result := readConfig(key)
+	result := readConfig(key)
 
-    if result != value {
-        t.Errorf("Read value %s is different from written value %s", result, value)
-    }
+	if result != value {
+		t.Errorf("Read value %s is different from written value %s", result, value)
+	}
 }
 
 func TestConfigFileWriteRead(t *testing.T) {
-    data := map[string]string{"testKey": "testValue"}
+	data := map[string]string{"testKey": "testValue"}
 
-    writeOnFile(data)
+	writeOnFile(data)
 
-    result := readFromFile()
+	result := readFromFile()
 
-    if !reflect.DeepEqual(data, result) {
-        t.Error("Failed file test")
-    }
+	if !reflect.DeepEqual(data, result) {
+		t.Error("Failed file test")
+	}
 
 }

@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
-	"log"
 	"io"
+	"log"
+	"net/http"
 )
 
 // Define structs to match the JSON structure
