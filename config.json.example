@@ -1,0 +1,9 @@
+
+{
+	"monzo_refresh_url": "https://api.monzo.com/oauth2/token",
+	"monzo_transactions_url": "https://api.monzo.com/transactions",
+	"monzo_client_id": "",
+	"monzo_client_secret": "",
+	"monzo_account_id": "",
+	"monzo_redirect_uri": "http://localhost:8080"
+}

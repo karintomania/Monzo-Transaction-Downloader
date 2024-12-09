@@ -1,13 +1,16 @@
 package monzo
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"karinto/trx-downloader/cache"
 	"karinto/trx-downloader/config"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+	"time"
 )
 
 func TestMonzoRefreshToken(t *testing.T) {
@@ -50,7 +53,7 @@ func TestMonzoRefreshToken(t *testing.T) {
 
 }
 
-func mockServer(t *testing.T, accessToken string, accountId string, tr TransactionResponse) *httptest.Server {
+func mockServer(t *testing.T, accessToken string, tr TransactionResponse, q map[string]string) *httptest.Server {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// assert URL
@@ -58,17 +61,16 @@ func mockServer(t *testing.T, accessToken string, accountId string, tr Transacti
 				t.Errorf("Expected to request %s, got: %s", want, got)
 			}
 
-			if got, want := r.URL.Query().Get("expand[]"), "merchant"; got != want {
-				t.Errorf("Expected expand[] to be %s, got: %s", want, got)
+			gotQs := r.URL.Query()
+			for k, want := range q {
+				if got := gotQs.Get(k); got != want {
+					t.Errorf("Expected query %s to be %s, got: %s", k, want, got)
+				}
 			}
 
-			if got, want := r.URL.Query().Get("account_id"), accountId; got != want {
-				t.Errorf("Expected expand[] to be %s, got: %s", want, got)
-			}
-
-			// assert Header
-			if got := r.Header.Get("Authorization"); got != accessToken {
-				t.Errorf("Expected %s, but got %s", accessToken, got)
+			// assert Auth
+			if got, want := r.Header.Get("Authorization"), "Bearer " + accessToken; got != want {
+				t.Errorf("Expected Authorization %s, but got %s", want, got)
 			}
 
 			jsonResponse, err := json.Marshal(tr)
@@ -97,36 +99,139 @@ func TestMonzoDownloadTransaction(t *testing.T) {
 		[]Transaction{
 			{
 				ID:          "tx_000001",
+				Created:     "2024-01-02T03:04:05.006Z",
 				Amount:      -1000,
+				Currency:    "GBP",
+				Notes:       "test note 1",
 				Description: "description 1",
 				Merchant: Merchant{
-					Name: "merchant A",
+					Name: "merchant 1",
+				},
+			},
+			{
+				ID:          "tx_000002",
+				Created:     "2025-02-03T04:05:06.007Z",
+				Amount:      -1001,
+				Currency:    "USD",
+				Notes:       "test note 2",
+				Description: "description 2",
+				Merchant: Merchant{
+					Name: "merchant 2",
 				},
 			},
 		},
 	}
 
-	server := mockServer(t, accessToken, accountId, wantResponse)
+    since := time.Now().AddDate(0, 1, 0)
+
+	wantQueries := map[string]string{
+		"expand[]":   "merchant",
+		"account_id": accountId,
+		"since":      since.Format(DateLayout),
+	}
+
+	server := mockServer(t, accessToken, wantResponse, wantQueries)
 
 	config.Set(
 		config.MONZO_TRANSACTIONS_URL,
 		fmt.Sprintf("%s/transactions?expand[]=merchant&account_id=%s", server.URL, accountId),
 	)
 
-	result := DownloadTransactions()
+	result := DownloadTransactions(since)
 
 	for i, want := range wantResponse.Transactions {
 		if want.ID != result[i].ID {
 			t.Errorf("Expected %s, but got %s", result[i].ID, want.ID)
 		}
+		if want.Created != result[i].Created {
+			t.Errorf("Expected %s, but got %s", result[i].Created, want.Created)
+		}
 		if want.Amount != result[i].Amount {
 			t.Errorf("Expected %d, but got %d", result[i].Amount, want.Amount)
+		}
+		if want.Currency != result[i].Currency {
+			t.Errorf("Expected %s, but got %s", result[i].Currency, want.Currency)
+		}
+		if want.Notes != result[i].Notes {
+			t.Errorf("Expected %s, but got %s", result[i].Notes, want.Notes)
 		}
 		if want.Description != result[i].Description {
 			t.Errorf("Expected %s, but got %s", result[i].Description, want.Description)
 		}
 		if want.Merchant.Name != result[i].Merchant.Name {
 			t.Errorf("Expected %s, but got %s", result[i].Merchant.Name, want.Merchant.Name)
+		}
+	}
+}
+
+func TestEncodeTransactionsCsv(t *testing.T) {
+	transactions := []Transaction{
+		{
+			ID:          "tx_000001",
+			Created:     "2024-01-02T03:04:05.006Z",
+			Amount:      -1000,
+			Currency:    "GBP",
+			Notes:       "test note 1",
+			Description: "description 1",
+			Merchant: Merchant{
+				Name: "merchant 1",
+			},
+		},
+		{
+			ID:          "tx_000002",
+			Created:     "2025-02-03T04:05:06.007Z",
+			Amount:      -1001,
+			Currency:    "USD",
+			Notes:       "test note 2",
+			Description: "description 2",
+			Merchant: Merchant{
+				Name: "merchant 2",
+			},
+		},
+	}
+
+	path, err := EncodeTransactionsCsv(transactions)
+	if err != nil {
+		t.Errorf("Failed to encode transactions to CSV: %v", err)
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		t.Errorf("Failed to open CSV: %v", err)
+	}
+	reader := csv.NewReader(f)
+
+	rowsGot, err := reader.ReadAll()
+	if err != nil {
+		t.Errorf("Failed to open CSV: %v", err)
+	}
+
+	for i, got := range rowsGot {
+		// Assert header
+		if i == 0 {
+			if got[0] != "ID" ||
+				got[1] != "Created" ||
+				got[2] != "Description" ||
+				got[3] != "Amount" ||
+				got[4] != "Currency" ||
+				got[5] != "Merchant" ||
+				got[6] != "Notes" {
+				t.Errorf("Expected header, but got %v", got)
+			}
+			continue
+		}
+
+		// assert rows
+		want := transactions[i-1]
+
+		if got[0] != want.ID ||
+			got[1] != want.Created ||
+			got[2] != want.Description ||
+			got[3] != fmt.Sprintf("%d", want.Amount) ||
+			got[4] != want.Currency ||
+			got[5] != want.Merchant.Name ||
+			got[6] != want.Notes {
+			t.Errorf("Expected %v, but got %v", want, got)
 		}
 	}
 
