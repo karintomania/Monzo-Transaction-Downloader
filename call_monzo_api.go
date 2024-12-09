@@ -18,15 +18,15 @@ func RefreshToken() {
 	refreshTokenResponse := callRefreshToken()
 
 	// Write the new access token to the cache
-	cache.WriteCache(cache.MonzoAccessTokenKey, refreshTokenResponse.AccessToken)
-	cache.WriteCache(cache.MonzoRefreshTokenKey, refreshTokenResponse.RefreshToken)
+	cache.Write(cache.MonzoAccessTokenKey, refreshTokenResponse.AccessToken)
+	cache.Write(cache.MonzoRefreshTokenKey, refreshTokenResponse.RefreshToken)
 }
 
 func callRefreshToken() RefreshTokenResponse {
 	// Make the HTTP GET request
 	url := config.Config["monzo_refresh_url"]
 
-	refreshToken := cache.ReadCache(cache.MonzoRefreshTokenKey)
+	refreshToken := cache.Read(cache.MonzoRefreshTokenKey)
 
 	header := map[string]string{"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json"}
 
@@ -50,4 +50,7 @@ func callRefreshToken() RefreshTokenResponse {
 
 	return refreshTokenResponse
 
+}
+
+func GetTransactions() {
 }

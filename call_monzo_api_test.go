@@ -12,8 +12,8 @@ func TestMonzoRefreshToken(t *testing.T) {
 
 	config.InitConfig()
 
-	cache.WriteCache(cache.MonzoAccessTokenKey, "accessToken_before")
-	cache.WriteCache(cache.MonzoRefreshTokenKey, "refreshToken_before")
+	cache.Write(cache.MonzoAccessTokenKey, "accessToken_before")
+	cache.Write(cache.MonzoRefreshTokenKey, "refreshToken_before")
 
 	server := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -41,8 +41,8 @@ func TestMonzoRefreshToken(t *testing.T) {
 
 	RefreshToken()
 
-	if cache.ReadCache(cache.MonzoAccessTokenKey) != "accessToken_after" &&
-    cache.ReadCache(cache.MonzoRefreshTokenKey) != "refreshToken_after" {
+	if cache.Read(cache.MonzoAccessTokenKey) != "accessToken_after" &&
+    cache.Read(cache.MonzoRefreshTokenKey) != "refreshToken_after" {
 		t.Error("Failed to refresh token")
 	}
 

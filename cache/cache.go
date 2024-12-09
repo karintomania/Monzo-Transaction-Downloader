@@ -12,7 +12,7 @@ const MonzoRefreshTokenKey = "MonzoRefreshToken"
 const MonzoClientIdKey = "MonzoClientId"
 const MonzoClientSecretKey = "MonzoClientSecret"
 
-func WriteCache(key, value string) bool {
+func Write(key, value string) bool {
 
 	c := readFromFile()
 	c[key] = value
@@ -22,7 +22,7 @@ func WriteCache(key, value string) bool {
 	return true
 }
 
-func ReadCache(key string) string {
+func Read(key string) string {
 	c := readFromFile()
 
 	return c[key]
