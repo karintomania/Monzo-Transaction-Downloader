@@ -1,13 +1,23 @@
 package main
 
 import (
+	"flag"
 	"karinto/trx-downloader/monzo"
 	"log"
 	"time"
 )
 
 func main() {
-	since := time.Now().AddDate(0, -1, 0)
+	var flagDays int
+	flag.IntVar(&flagDays, "d", 30, "Download transactions from the past specified number of days. For example, -d 30 downloads the last 30 days' transactions.")
+
+	flag.Parse()
+
+	callMonzo(flagDays)
+}
+
+func callMonzo(days int) {
+	since := time.Now().AddDate(0, 0, -1*days)
 
 	log.Printf("Refresh token")
 	monzo.RefreshToken()
