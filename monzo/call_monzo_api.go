@@ -54,13 +54,12 @@ func callRefreshToken() RefreshTokenResponse {
 }
 
 type transaction struct {
-    id string
-    amount int
-    currency string
-    description string
-    merchantName string
+	id           string
+	amount       int
+	currency     string
+	description  string
+	merchantName string
 }
-
 
 func DownloadTransactions() []transaction {
 
@@ -69,18 +68,18 @@ func DownloadTransactions() []transaction {
 	accessToken := cache.Read(cache.MonzoAccessTokenKey)
 
 	header := map[string]string{
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json",
-        "Authorization": accessToken,
-    }
+		"Content-Type":  "application/x-www-form-urlencoded",
+		"Accept":        "application/json",
+		"Authorization": accessToken,
+	}
 
 	body, err := httpClient.Get(url, header)
-    if err != nil {
-        log.Fatalf("Failed to make HTTP request for monzo transaction download: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("Failed to make HTTP request for monzo transaction download: %v", err)
+	}
 
-    var transactions []transaction
-    json.Unmarshal(body, &transactions)
+	var transactions []transaction
+	json.Unmarshal(body, &transactions)
 
-    return transactions
+	return transactions
 }
