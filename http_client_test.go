@@ -10,7 +10,9 @@ import (
 func TestHttpGet(t *testing.T) {
 
 	header := map[string]string{"Authorization": "Bearer 12345"}
+
 	expectedResponseBody := []byte(`{"data":"success"}`)
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/test-path" {
 			t.Errorf("Expected to request '/test-path', got: %s", r.URL.Path)
@@ -30,9 +32,7 @@ func TestHttpGet(t *testing.T) {
 
 	defer server.Close()
 
-	h := httpClientImpl{}
-
-	actual, _ := h.httpGet(url, header)
+	actual, _ := httpGet(url, header)
 
 	if string(expectedResponseBody) != string(actual) {
 		t.Errorf("Expected %s, got %s", expectedResponseBody, actual)
@@ -74,9 +74,7 @@ func TestHttpPost(t *testing.T) {
 
 	defer server.Close()
 
-	h := httpClientImpl{}
-
-	actual, _ := h.httpPost(url, header, payload)
+	actual, _ := httpPost(url, header, payload)
 
 	if string(expectedResponseBody) != string(actual) {
 		t.Errorf("Expected %s, got %s", expectedResponseBody, actual)

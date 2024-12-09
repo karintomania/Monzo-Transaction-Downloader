@@ -1,10 +1,10 @@
-package main
+package cache
 
 import (
 	"encoding/json"
+	"karinto/trx-downloader/config"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 const MonzoAccessTokenKey = "MonzoAccessToken"
@@ -12,8 +12,7 @@ const MonzoRefreshTokenKey = "MonzoRefreshToken"
 const MonzoClientIdKey = "MonzoClientId"
 const MonzoClientSecretKey = "MonzoClientSecret"
 
-func writeConfig(key, value string) bool {
-
+func WriteCache(key, value string) bool {
 	c := readFromFile()
 	c[key] = value
 
@@ -22,21 +21,20 @@ func writeConfig(key, value string) bool {
 	return true
 }
 
-func readConfig(key string) string {
+func ReadCache(key string) string {
 	c := readFromFile()
 
 	return c[key]
 }
 
 func writeOnFile(data map[string]string) {
-	log.SetFlags(log.Lshortfile)
 	b, err := json.Marshal(data)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	path := getConfigFilePath()
+	path := config.Config["cache_file_path"]
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatal(err)
@@ -51,7 +49,7 @@ func writeOnFile(data map[string]string) {
 }
 
 func readFromFile() map[string]string {
-	path := getConfigFilePath()
+	path := config.Config["cache_file_path"]
 
 	err := ensureFileExists(path)
 
@@ -59,26 +57,23 @@ func readFromFile() map[string]string {
 		log.Fatal(err)
 	}
 
-	body, err := os.ReadFile(path)
-
-	log.Println(string(body))
+	f, err := os.Open(path)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if len(body) == 0 {
-		body = []byte("{}")
-	}
+    decoder := json.NewDecoder(f)
 
-	var config map[string]string
-	err = json.Unmarshal(body, &config)
+    cache := make(map[string]string)
+
+	decoder.Decode(&cache)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return config
+    return cache
 }
 
 func ensureFileExists(path string) error {
@@ -90,21 +85,4 @@ func ensureFileExists(path string) error {
 		defer file.Close()
 	}
 	return nil
-}
-
-func getConfigFilePath() string {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalf("Error getting home directory: %v", err)
-	}
-
-	configDir := filepath.Join(homeDir, ".config", "trx-downloader")
-
-	err = os.MkdirAll(configDir, 0775)
-	if err != nil {
-		log.Fatalf("Error creating config directory: %v", err)
-	}
-	configFilePath := filepath.Join(configDir, "/config.json")
-
-	return configFilePath
 }
