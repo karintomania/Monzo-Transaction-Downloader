@@ -2,6 +2,9 @@
 This project helps me download the transaction records for my budgeting tool automatically.
 
 # Prerequisites
+- Go
+- Monzo Access Token
+
 You need to have a monzo developer account and create an API client.
 After that, you need to run the OAuth steps manually (open https://auth.monzo.com and login, open email, and get the token from the callback URL) to get access token and refresh token for the first time.
 I might automate in the future.
