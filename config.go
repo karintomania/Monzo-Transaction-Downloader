@@ -29,16 +29,15 @@ func readConfig(key string) string {
 }
 
 func writeOnFile(data map[string]string) {
-
+	log.SetFlags(log.Lshortfile)
 	b, err := json.Marshal(data)
-	log.Println(string(b))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	path := filepath.Dir(os.Args[0]) + "/config.json"
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0777)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,6 +60,8 @@ func readFromFile() map[string]string {
 	}
 
 	body, err := os.ReadFile(path)
+
+	log.Println(string(body))
 
 	if err != nil {
 		log.Fatal(err)

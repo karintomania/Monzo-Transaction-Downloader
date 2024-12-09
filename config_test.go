@@ -34,3 +34,14 @@ func TestConfigFileWriteRead(t *testing.T) {
 	}
 
 }
+
+func TestConfigReadNilValue(t *testing.T) {
+
+	// retrive a key that does not exist
+	result := readConfig("KeyWithoutValue")
+
+	if result != "" {
+		t.Error("Failed config read nil test")
+	}
+
+}
