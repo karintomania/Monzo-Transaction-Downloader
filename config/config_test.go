@@ -27,7 +27,7 @@ func mockConfigFile(wantConfig *map[string]string, t *testing.T) {
 	readConfigFile(f.Name())
 }
 
-func TestReadConfigFile(t *testing.T) {
+func TestReadFileAndGet(t *testing.T) {
 
 	wantConfig := map[string]string{"testKey1": "testValue1", "testKey2": "testValue2"}
 	mockConfigFile(&wantConfig, t)

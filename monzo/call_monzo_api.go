@@ -1,9 +1,10 @@
-package main
+package monzo
 
 import (
 	"encoding/json"
 	"karinto/trx-downloader/cache"
 	"karinto/trx-downloader/config"
+	"karinto/trx-downloader/httpClient"
 	"log"
 )
 
@@ -37,7 +38,7 @@ func callRefreshToken() RefreshTokenResponse {
 		"refresh_token": {refreshToken},
 	}
 
-	body, err := httpPostForm(url, header, formDataMap)
+	body, err := httpClient.PostForm(url, header, formDataMap)
 	if err != nil {
 		log.Fatalf("Failed to make HTTP request: %v", err)
 	}
@@ -52,5 +53,34 @@ func callRefreshToken() RefreshTokenResponse {
 
 }
 
-func GetTransactions() {
+type transaction struct {
+    id string
+    amount int
+    currency string
+    description string
+    merchantName string
+}
+
+
+func DownloadTransactions() []transaction {
+
+	url := config.Get(config.MONZO_TRANSACTIONS_URL)
+
+	accessToken := cache.Read(cache.MonzoAccessTokenKey)
+
+	header := map[string]string{
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json",
+        "Authorization": accessToken,
+    }
+
+	body, err := httpClient.Get(url, header)
+    if err != nil {
+        log.Fatalf("Failed to make HTTP request for monzo transaction download: %v", err)
+    }
+
+    var transactions []transaction
+    json.Unmarshal(body, &transactions)
+
+    return transactions
 }

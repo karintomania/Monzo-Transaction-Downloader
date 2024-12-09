@@ -9,6 +9,13 @@ import (
 
 var config map[string]string
 
+const MONZO_REFRESH_URL = "monzo_refresh_url"
+const MONZO_TRANSACTIONS_URL = "monzo_transactions_url"
+const MONZO_CLIENT_ID = "monzo_client_id"
+const MONZO_CLIENT_SECRET = "monzo_client_secret"
+const MONZO_ACCOUNT_ID = "monzo_account_id"
+const MONZO_REDIRECT_URI = "monzo_redirect_uri"
+
 func Get(key string) string {
 	if config == nil {
 		initConfig()

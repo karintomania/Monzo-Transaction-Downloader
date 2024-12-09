@@ -1,4 +1,4 @@
-package main
+package httpClient
 
 import (
 	"bytes"
@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-func httpGet(url string, header map[string]string) ([]byte, error) {
+// TODO: Add query parameters map
+func Get(url string, header map[string]string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -18,7 +19,7 @@ func httpGet(url string, header map[string]string) ([]byte, error) {
 	return sendRequest(header, req)
 }
 
-func httpPostForm(urlString string, header map[string]string, formDataMap map[string][]string) ([]byte, error) {
+func PostForm(urlString string, header map[string]string, formDataMap map[string][]string) ([]byte, error) {
 
 	formData := url.Values(formDataMap)
 	req, err := http.NewRequest("POST", urlString, strings.NewReader(formData.Encode()))
@@ -29,7 +30,7 @@ func httpPostForm(urlString string, header map[string]string, formDataMap map[st
 	return sendRequest(header, req)
 }
 
-func httpPost(url string, header map[string]string, payload []byte) ([]byte, error) {
+func Post(url string, header map[string]string, payload []byte) ([]byte, error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)

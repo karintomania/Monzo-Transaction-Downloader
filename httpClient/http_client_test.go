@@ -1,4 +1,4 @@
-package main
+package httpClient
 
 import (
 	"io"
@@ -18,9 +18,11 @@ func TestHttpGet(t *testing.T) {
 		if r.URL.Path != "/test-path" {
 			t.Errorf("Expected to request '/test-path', got: %s", r.URL.Path)
 		}
+
 		if r.Method != "GET" {
 			t.Errorf("Expected to GET method, got: %s", r.URL.Path)
 		}
+
 		if r.Header.Get("Authorization") != "Bearer 12345" {
 			t.Errorf("Expected 'Authorization: Bearer 12345', got: %s", r.Header.Get("Authorization"))
 		}
@@ -36,7 +38,7 @@ func TestHttpGet(t *testing.T) {
 
 	defer server.Close()
 
-	actual, _ := httpGet(url, header)
+	actual, _ := Get(url, header)
 
 	if string(expectedResponseBody) != string(actual) {
 		t.Errorf("Expected %s, got %s", expectedResponseBody, actual)
@@ -82,7 +84,7 @@ func TestHttpPost(t *testing.T) {
 
 	defer server.Close()
 
-	actual, _ := httpPost(url, header, payload)
+	actual, _ := Post(url, header, payload)
 
 	if string(expectedResponseBody) != string(actual) {
 		t.Errorf("Expected %s, got %s", expectedResponseBody, actual)
@@ -131,7 +133,7 @@ func TestHttpPostForm(t *testing.T) {
 
 	defer server.Close()
 
-	actual, _ := httpPostForm(url, header, formData)
+	actual, _ := PostForm(url, header, formData)
 
 	if string(expectedResponseBody) != string(actual) {
 		t.Errorf("Expected %s, got %s", expectedResponseBody, actual)
