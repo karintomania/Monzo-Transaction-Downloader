@@ -54,14 +54,28 @@ func writeOnFile(data map[string]string) {
 func readFromFile() map[string]string {
 	path := filepath.Dir(os.Args[0]) + "/config.json"
 
+	err := ensureFileExists(path)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	body, err := os.ReadFile(path)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if len(body) == 0 {
+		body = []byte("{}")
+	}
+
 	var config map[string]string
-	json.Unmarshal(body, &config)
+	err = json.Unmarshal(body, &config)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return config
 }
