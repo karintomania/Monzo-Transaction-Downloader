@@ -26,7 +26,10 @@ func readConfigFile(path string) {
 
 	decoder := json.NewDecoder(f)
 
-	decoder.Decode(&Config)
+	err = decoder.Decode(&Config)
+	if err != nil {
+		log.Fatalf("Failed to decode config: %v", err)
+	}
 }
 
 func getConfigFolderPath() string {

@@ -25,7 +25,10 @@ func TestHttpGet(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(expectedResponseBody)
+		_, err := w.Write(expectedResponseBody)
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
 	}))
 
 	url := server.URL + "/test-path"
@@ -67,7 +70,11 @@ func TestHttpPost(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(expectedResponseBody)
+
+		_, err = w.Write(expectedResponseBody)
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
 	}))
 
 	url := server.URL + "/test-path"

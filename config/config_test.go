@@ -15,9 +15,16 @@ func TestReadConfigFile(t *testing.T) {
 	}
 
 	f, err := os.CreateTemp("", "test_config.json")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+
 	defer os.Remove(f.Name())
 
-	f.Write(bytes)
+	_, err = f.Write(bytes)
+	if err != nil {
+		t.Fatalf("Failed to write on config file: %v", err)
+	}
 
 	readConfigFile(f.Name())
 

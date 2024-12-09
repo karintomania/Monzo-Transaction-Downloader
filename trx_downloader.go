@@ -7,5 +7,5 @@ import (
 
 func main() {
 	fmt.Println("Hello, World!")
-    cache.WriteCache("test", "testvalue")
+	cache.WriteCache("test", "testvalue")
 }

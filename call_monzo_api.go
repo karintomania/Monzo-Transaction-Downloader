@@ -14,11 +14,11 @@ type RefreshTokenResponse struct {
 }
 
 func RefreshToken() {
-    // Call the function to refresh the token
-    refreshTokenResponse := callRefreshToken()
-    // Write the new access token to the cache
-    cache.WriteCache(cache.MonzoAccessTokenKey, refreshTokenResponse.AccessToken)
-    cache.WriteCache(cache.MonzoRefreshTokenKey, refreshTokenResponse.RefreshToken)
+	// Call the function to refresh the token
+	refreshTokenResponse := callRefreshToken()
+	// Write the new access token to the cache
+	cache.WriteCache(cache.MonzoAccessTokenKey, refreshTokenResponse.AccessToken)
+	cache.WriteCache(cache.MonzoRefreshTokenKey, refreshTokenResponse.RefreshToken)
 }
 
 func callRefreshToken() RefreshTokenResponse {
@@ -27,9 +27,21 @@ func callRefreshToken() RefreshTokenResponse {
 
 	refreshToken := cache.ReadCache(cache.MonzoRefreshTokenKey)
 
-	header := map[string]string{"Authorization": refreshToken}
+	header := map[string]string{}
 
-	body, err := httpPost(url, header, nil)
+	payloadMap := map[string]string{
+		"grant_type":    "refresh_token",
+		"client_id":     config.Config["monzo_client_id"],
+		"client_secret": config.Config["monzo_client_secret"],
+		"refresh_token": refreshToken,
+	}
+
+	payload, err := json.Marshal(payloadMap)
+	if err != nil {
+		log.Fatalf("Failed to marshall payload map: %v", err)
+	}
+
+	body, err := httpPost(url, header, payload)
 	if err != nil {
 		log.Fatalf("Failed to make HTTP request: %v", err)
 	}
