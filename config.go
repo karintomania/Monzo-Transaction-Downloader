@@ -36,8 +36,8 @@ func writeOnFile(data map[string]string) {
 		log.Fatal(err)
 	}
 
-	path := filepath.Dir(os.Args[0]) + "/config.json"
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
+	path := getConfigFilePath()
+    f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func writeOnFile(data map[string]string) {
 }
 
 func readFromFile() map[string]string {
-	path := filepath.Dir(os.Args[0]) + "/config.json"
+	path := getConfigFilePath()
 
 	err := ensureFileExists(path)
 
@@ -90,4 +90,21 @@ func ensureFileExists(path string) error {
 		defer file.Close()
 	}
 	return nil
+}
+
+func getConfigFilePath() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalf("Error getting home directory: %v", err)
+	}
+
+    configDir := filepath.Join(homeDir, ".config", "trx-downloader")
+
+    err = os.MkdirAll(configDir, 0775)
+	if err != nil {
+		log.Fatalf("Error creating config directory: %v", err)
+	}
+    configFilePath := filepath.Join(configDir, "/config.json")
+
+    return configFilePath
 }
