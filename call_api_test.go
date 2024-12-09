@@ -4,9 +4,10 @@ import (
 	"testing"
 )
 
-func TestCall(t *testing.T) {
-	t.Log("aaaa")
-	users := call()
-	user := users[0]
-	t.Log(user.ID)
+func TestCallRefreshToken(t *testing.T) {
+	result := callRefreshToken()
+
+	if result.AccessToken != "accessToken_xxx" && result.RefreshToken != "refreshToken_xxx" {
+		t.Error("Failed to refresh token")
+	}
 }

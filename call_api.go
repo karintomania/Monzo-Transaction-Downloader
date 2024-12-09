@@ -8,60 +8,68 @@ import (
 )
 
 // Define structs to match the JSON structure
-type Geo struct {
-	Lat string `json:"lat"`
-	Lng string `json:"lng"`
+type RefreshTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	// ExpiresIn string `"json:"expires_in"`
+	// ClientId string `"json:"client_id"`
+	// Scope string `"json:"scope"`
+	// TokenType string `"json:"token_type"`
+	// UserId string `"json:"user_id"`
 }
 
-type Address struct {
-	Street  string `json:"street"`
-	Suite   string `json:"suite"`
-	City    string `json:"city"`
-	Zipcode string `json:"zipcode"`
-	Geo     Geo    `json:"geo"`
-}
-
-type Company struct {
-	Name        string `json:"name"`
-	CatchPhrase string `json:"catchPhrase"`
-	Bs          string `json:"bs"`
-}
-
-type User struct {
-	ID       int     `json:"id"`
-	Name     string  `json:"name"`
-	Username string  `json:"username"`
-	Email    string  `json:"email"`
-	Address  Address `json:"address"`
-	Phone    string  `json:"phone"`
-	Website  string  `json:"website"`
-	Company  Company `json:"company"`
-}
-
-func call() []User {
+func callHttpRefreshToken() []byte {
 	// Make the HTTP GET request
-	resp, err := http.Get("https://jsonplaceholder.typicode.com/users")
+	req, err := http.NewRequest("GET", "https://api.monzo.com/oauth2/token", nil)
 	if err != nil {
-		log.Fatalf("Failed to fetch users: %v", err)
+		log.Fatalf("Failed to create request: %v", err)
+	}
+
+	req.Header.Add("Authorization", "Bearer "+readConfig(MonzoRefreshTokenKey))
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("Failed to send request: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Check the status code
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Failed to fetch users: %v", resp.Status)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to read request body: %v", err)
 	}
 
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Failed to read response body: %v", err)
-	}
+	return b
+}
+
+func callHttpRefreshTokenMock() []byte {
+
+	return []byte(`{
+    "access_token":"accessToken_xxx",
+    "refresh_token":"refreshToken_xxx",
+    "expires_in":21600,
+    "client_id":"client_123",
+    "scope":"accounts",
+    "token_type":"refresh",
+    "user_id":"user_123"
+    }`)
+}
+
+func callRefreshToken() RefreshTokenResponse {
+
+	body := callHttpRefreshTokenMock()
+
+	log.Println(string(body))
 
 	// Parse the JSON response
-	var users []User
-	if err := json.Unmarshal(body, &users); err != nil {
+	var refreshTokenResponse RefreshTokenResponse
+	if err := json.Unmarshal(body, &refreshTokenResponse); err != nil {
 		log.Fatalf("Failed to parse JSON: %v", err)
 	}
 
-	return users
+	log.Println(refreshTokenResponse)
+
+	return refreshTokenResponse
+
 }
