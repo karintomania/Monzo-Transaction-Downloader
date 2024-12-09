@@ -6,6 +6,7 @@ import (
 	"karinto/trx-downloader/config"
 	"karinto/trx-downloader/httpClient"
 	"log"
+	"time"
 )
 
 // Define structs to match the JSON structure
@@ -53,15 +54,34 @@ func callRefreshToken() RefreshTokenResponse {
 
 }
 
-type transaction struct {
-	id           string
-	amount       int
-	currency     string
-	description  string
-	merchantName string
+type TransactionResponse struct {
+	Transactions []Transaction `json:"transactions"`
 }
 
-func DownloadTransactions() []transaction {
+type Transaction struct {
+	ID                  string         `json:"id"`
+	Created             time.Time      `json:"created"`
+	Description         string         `json:"description"`
+	Amount              int            `json:"amount"`
+	Currency            string         `json:"currency"`
+	Merchant            Merchant       `json:"merchant"`
+	Category            string         `json:"category"`
+	Categories          map[string]int `json:"categories"`
+	Settled             time.Time      `json:"settled"`
+	LocalAmount         int            `json:"local_amount"`
+	LocalCurrency       string         `json:"local_currency"`
+	Updated             time.Time      `json:"updated"`
+}
+
+type Merchant struct {
+	ID       string `json:"id"`
+	GroupID  string `json:"group_id"`
+	Name     string `json:"name"`
+	Logo     string `json:"logo"`
+	Category string `json:"category"`
+}
+
+func DownloadTransactions() []Transaction {
 
 	url := config.Get(config.MONZO_TRANSACTIONS_URL)
 
@@ -78,8 +98,11 @@ func DownloadTransactions() []transaction {
 		log.Fatalf("Failed to make HTTP request for monzo transaction download: %v", err)
 	}
 
-	var transactions []transaction
-	json.Unmarshal(body, &transactions)
+	// var response transactionResponse
+	var tr TransactionResponse
+	if err = json.Unmarshal(body, &tr); err != nil {
+		log.Fatalf("Failed to unmarshal response body: %v", err)
+	}
 
-	return transactions
+	return tr.Transactions
 }

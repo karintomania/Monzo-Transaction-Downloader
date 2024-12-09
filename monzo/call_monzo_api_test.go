@@ -1,6 +1,7 @@
 package monzo
 
 import (
+	"encoding/json"
 	"fmt"
 	"karinto/trx-downloader/cache"
 	"karinto/trx-downloader/config"
@@ -49,6 +50,41 @@ func TestMonzoRefreshToken(t *testing.T) {
 
 }
 
+func mockServer(t *testing.T, accessToken string, accountId string, tr TransactionResponse) *httptest.Server {
+	server := httptest.NewServer(http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			// assert URL
+			if got, want := r.URL.Path, "/transactions"; got != want {
+				t.Errorf("Expected to request %s, got: %s", want, got)
+			}
+
+			if got, want := r.URL.Query().Get("expand[]"), "merchant"; got != want {
+				t.Errorf("Expected expand[] to be %s, got: %s", want, got)
+			}
+
+			if got, want := r.URL.Query().Get("account_id"), accountId; got != want {
+				t.Errorf("Expected expand[] to be %s, got: %s", want, got)
+			}
+
+			// assert Header
+			if got := r.Header.Get("Authorization"); got != accessToken {
+				t.Errorf("Expected %s, but got %s", accessToken, got)
+			}
+
+			jsonResponse, err := json.Marshal(tr)
+			if err != nil {
+				t.Errorf("Failed to marshal response: %v", err)
+			}
+
+			_, err = w.Write(jsonResponse)
+			if err != nil {
+				t.Errorf("Failed to write json response: %v", err)
+			}
+		}))
+
+	return server
+}
+
 func TestMonzoDownloadTransaction(t *testing.T) {
 
 	accessToken := "accessToken_123"
@@ -57,55 +93,41 @@ func TestMonzoDownloadTransaction(t *testing.T) {
 	accountId := "accountId_123"
 	config.Set(config.MONZO_ACCOUNT_ID, accountId)
 
-	server := httptest.NewServer(http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			// assert URL
-			wantUrl := fmt.Sprintf("/transactions?expand[]=merchant&account_id=%s", accountId)
-			if got := r.URL.Path; got != wantUrl {
-				t.Errorf("Expected to request %s, got: %s", wantUrl, got)
-			}
+	wantResponse := TransactionResponse{
+		[]Transaction{
+			{
+				ID:          "tx_000001",
+				Amount:      -1000,
+				Description: "description 1",
+				Merchant: Merchant{
+					Name: "merchant A",
+				},
+			},
+		},
+	}
 
-			// assert Header
-			if got := r.Header.Get("Authorization"); got != "accessToken" {
-				t.Errorf("Expected %s, but got %s", accessToken, got)
-			}
+	server := mockServer(t, accessToken, accountId, wantResponse)
 
-			w.WriteHeader(http.StatusOK)
-			_, err := w.Write([]byte(`{
-  "transactions": [
-        {
-           "id": "tx_0000AnfhaSVKiaF0Y9x6vZ",
-           "created": "2024-11-03T16:47:18.081Z",
-           "description": "Description xxx",
-           "amount": -1640,
-           "currency": "GBP",
-           "merchant": {
-             "name": "Merchant A",
-           },
-           "local_amount": -1640,
-           "local_currency": "GBP",
-           "updated": "2024-11-04T08:45:33.734Z",
-        }
-    ]
-}`))
-			if err != nil {
-				t.Errorf("Failed to write json response: %v", err)
-			}
-		}))
-
-	config.Set(config.MONZO_TRANSACTIONS_URL, server.URL)
+	config.Set(
+		config.MONZO_TRANSACTIONS_URL,
+		fmt.Sprintf("%s/transactions?expand[]=merchant&account_id=%s", server.URL, accountId),
+	)
 
 	result := DownloadTransactions()
 
-	transaction := result[0]
+	for i, want := range wantResponse.Transactions {
+		if want.ID != result[i].ID {
+			t.Errorf("Expected %s, but got %s", result[i].ID, want.ID)
+		}
+		if want.Amount != result[i].Amount {
+			t.Errorf("Expected %d, but got %d", result[i].Amount, want.Amount)
+		}
+		if want.Description != result[i].Description {
+			t.Errorf("Expected %s, but got %s", result[i].Description, want.Description)
+		}
+		if want.Merchant.Name != result[i].Merchant.Name {
+			t.Errorf("Expected %s, but got %s", result[i].Merchant.Name, want.Merchant.Name)
+		}
+	}
 
-	if transaction.id != "tx_0000AnfhaSVKiaF0Y9x6vZ" {
-		t.Errorf("Expected tx_0000AnfhaSVKiaF0Y9x6vZ, but got %s", transaction.id)
-	}
-	if transaction.amount != -1640 {
-		t.Errorf("Expected -1640, but got %d", transaction.amount)
-	}
-	if transaction.merchantName != "Merchant A" {
-		t.Errorf("Expected Merchant A, but got %s", transaction.merchantName)
-	}
 }
