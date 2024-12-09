@@ -24,7 +24,7 @@ func RefreshToken() {
 
 func callRefreshToken() RefreshTokenResponse {
 	// Make the HTTP GET request
-	url := config.Config["monzo_refresh_url"]
+	url := config.Get("monzo_refresh_url")
 
 	refreshToken := cache.Read(cache.MonzoRefreshTokenKey)
 
@@ -32,8 +32,8 @@ func callRefreshToken() RefreshTokenResponse {
 
 	formDataMap := map[string][]string{
 		"grant_type":    {"refresh_token"},
-		"client_id":     {config.Config["monzo_client_id"]},
-		"client_secret": {config.Config["monzo_client_secret"]},
+		"client_id":     {config.Get("monzo_client_id")},
+		"client_secret": {config.Get("monzo_client_secret")},
 		"refresh_token": {refreshToken},
 	}
 

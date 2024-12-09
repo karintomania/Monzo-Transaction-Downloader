@@ -68,7 +68,7 @@ func prepareCacheFile(t *testing.T) {
 		t.Errorf("Error on writing tmp cache: %v", err)
 	}
 
-	config.Config["cache_file_path"] = f.Name()
+	config.Set("cache_file_path", f.Name())
 }
 
 func cleanupCacheFile(t *testing.T) {

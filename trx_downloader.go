@@ -1,12 +1,7 @@
 package main
 
-import (
-	"karinto/trx-downloader/config"
-)
+import ()
 
 func main() {
-    config.InitConfig()
-
-    RefreshToken()
 
 }

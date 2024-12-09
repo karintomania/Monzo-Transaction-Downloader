@@ -6,10 +6,8 @@ import (
 	"testing"
 )
 
-func TestReadConfigFile(t *testing.T) {
-
-	configWant := map[string]string{"testKey1": "testValue1", "testKey2": "testValue2"}
-	bytes, err := json.Marshal(configWant)
+func mockConfigFile(wantConfig *map[string]string, t *testing.T) {
+	bytes, err := json.Marshal(wantConfig)
 	if err != nil {
 		t.Fatalf("Failed to marshal configExpected: %v", err)
 	}
@@ -27,10 +25,16 @@ func TestReadConfigFile(t *testing.T) {
 	}
 
 	readConfigFile(f.Name())
+}
 
-	for key, want := range configWant {
-		if value, exists := Config[key]; !exists || value != want {
-			t.Errorf("Config mismatch for key %s: expected %s, got %s", key, want, value)
+func TestReadConfigFile(t *testing.T) {
+
+	wantConfig := map[string]string{"testKey1": "testValue1", "testKey2": "testValue2"}
+	mockConfigFile(&wantConfig, t)
+
+	for key, want := range wantConfig {
+		if got := Get(key); got != want {
+			t.Errorf("Config mismatch for key %s: expected %s, got %s", key, want, got)
 		}
 	}
 

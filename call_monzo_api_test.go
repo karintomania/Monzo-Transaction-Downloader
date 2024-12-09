@@ -10,15 +10,13 @@ import (
 
 func TestMonzoRefreshToken(t *testing.T) {
 
-	config.InitConfig()
-
 	cache.Write(cache.MonzoAccessTokenKey, "accessToken_before")
 	cache.Write(cache.MonzoRefreshTokenKey, "refreshToken_before")
 
 	server := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-            
-            err := r.ParseForm()
+
+			err := r.ParseForm()
 			if err != nil {
 				t.Errorf("Failed to parse form data: %v", err)
 			}
@@ -37,12 +35,12 @@ func TestMonzoRefreshToken(t *testing.T) {
 			}
 		}))
 
-	config.Config["monzo_refresh_url"] = server.URL
+	config.Set("monzo_refresh_url", server.URL)
 
 	RefreshToken()
 
 	if cache.Read(cache.MonzoAccessTokenKey) != "accessToken_after" &&
-    cache.Read(cache.MonzoRefreshTokenKey) != "refreshToken_after" {
+		cache.Read(cache.MonzoRefreshTokenKey) != "refreshToken_after" {
 		t.Error("Failed to refresh token")
 	}
 

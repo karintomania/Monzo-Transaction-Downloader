@@ -7,14 +7,32 @@ import (
 	"path/filepath"
 )
 
-var Config map[string]string = make(map[string]string)
+var config map[string]string
 
-func InitConfig() {
+func Get(key string) string {
+	if config == nil {
+		initConfig()
+	}
+
+	return config[key]
+}
+
+// only use for testing
+func Set(key string, value string) {
+	if config == nil {
+		initConfig()
+	}
+
+	config[key] = value
+}
+
+func initConfig() {
+	config = make(map[string]string)
 	configDir := getConfigFolderPath()
-	Config["config_file_path"] = filepath.Join(configDir, "/config.json")
-	Config["cache_file_path"] = filepath.Join(configDir, "/cache.json")
+	config["config_file_path"] = filepath.Join(configDir, "/config.json")
+	config["cache_file_path"] = filepath.Join(configDir, "/cache.json")
 
-	readConfigFile(Config["config_file_path"])
+	readConfigFile(config["config_file_path"])
 }
 
 func readConfigFile(path string) {
@@ -26,7 +44,7 @@ func readConfigFile(path string) {
 
 	decoder := json.NewDecoder(f)
 
-	err = decoder.Decode(&Config)
+	err = decoder.Decode(&config)
 	if err != nil {
 		log.Fatalf("Failed to decode config: %v", err)
 	}

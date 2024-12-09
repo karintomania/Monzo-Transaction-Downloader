@@ -95,8 +95,8 @@ func TestHttpPostForm(t *testing.T) {
 	header := map[string]string{"Authorization": "Bearer 12345"}
 	expectedResponseBody := []byte(`{"data":"success"}`)
 	formDataMap := map[string][]string{"key1": {"value1"}, "key2": {"value2"}}
-    formData := url.Values(formDataMap)
-    formDataEncoded := formData.Encode()
+	formData := url.Values(formDataMap)
+	formDataEncoded := formData.Encode()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -105,8 +105,8 @@ func TestHttpPostForm(t *testing.T) {
 			t.Errorf("Error on reading payload: %v", err)
 		}
 
-		if string(payloadReceived) !=  formDataEncoded {
-            t.Errorf("Expected formatData: %s, got: %s", formDataEncoded, payloadReceived)
+		if string(payloadReceived) != formDataEncoded {
+			t.Errorf("Expected formatData: %s, got: %s", formDataEncoded, payloadReceived)
 		}
 
 		if r.URL.Path != "/test-path" {

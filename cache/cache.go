@@ -34,7 +34,7 @@ func writeOnFile(data map[string]string) {
 		log.Fatalf("Failed to marshal json: %v", err)
 	}
 
-	path := config.Config["cache_file_path"]
+	path := config.Get("cache_file_path")
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Fatalf("Failed to open cache file: %v", err)
@@ -48,7 +48,7 @@ func writeOnFile(data map[string]string) {
 }
 
 func readFromFile() map[string]string {
-	path := config.Config["cache_file_path"]
+	path := config.Get("cache_file_path")
 
 	err := ensureFileExists(path)
 	if err != nil {

@@ -20,8 +20,8 @@ func httpGet(url string, header map[string]string) ([]byte, error) {
 
 func httpPostForm(urlString string, header map[string]string, formDataMap map[string][]string) ([]byte, error) {
 
-    formData := url.Values(formDataMap)
-    req, err := http.NewRequest("POST", urlString, strings.NewReader(formData.Encode()))
+	formData := url.Values(formDataMap)
+	req, err := http.NewRequest("POST", urlString, strings.NewReader(formData.Encode()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -59,8 +59,8 @@ func sendRequest(header map[string]string, req *http.Request) ([]byte, error) {
 	}
 
 	if resp.StatusCode != 200 {
-        return nil, fmt.Errorf("unexpected status code: %d, %s", resp.StatusCode, string(body[:]))
-    }
+		return nil, fmt.Errorf("unexpected status code: %d, %s", resp.StatusCode, string(body[:]))
+	}
 
 	return body, nil
 }
