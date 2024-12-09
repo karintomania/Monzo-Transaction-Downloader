@@ -12,17 +12,21 @@ I might automate in the future.
 # How to use
 Clone the repo.
 ```
-git clone
+git clone https://github.com/karintomania/Monzo-Transaction-Downloader
 ```
 
 Copy the config.json.example to `~/.config/trx-downloader/`.
 ```
-git clone
 mkdir -p ~/.config/trx-downloader/
+
+// copy config.json
 cp config.json.example ~/.config/trx-downloader/config.json
+
+// copy cache.json. Cache is kind of used like database in this project ;)
+cp cache.json.example ~/.config/trx-downloader/cache.json
 ```
 
-Fill the config.json with necessary fields and you are good to go.
+Fill the config.json and cache.json with necessary fields and you are good to go.
 
 # Download
 Run the command below and the CSV file will be generated in the same folder:
